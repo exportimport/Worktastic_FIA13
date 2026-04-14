@@ -38,14 +38,23 @@ namespace Worktastic.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public IActionResult CreateEditForm(JobPosting model)
+        public async Task<IActionResult> CreateEditForm(JobPosting model, IFormFile? CompanyLogo)
         {
             if (!ModelState.IsValid)
                 return View(model);
 
+            byte[]? logoBytes = null;
+            if (CompanyLogo != null && CompanyLogo.Length > 0)
+            {
+                using var ms = new MemoryStream();
+                await CompanyLogo.CopyToAsync(ms);
+                logoBytes = ms.ToArray();
+            }
+
             if (model.Id == 0)
             {
                 model.OwnerName = User.Identity!.Name;
+                model.CompanyLogo = logoBytes;
                 _db.JobPosts.Add(model);
             }
             else
@@ -63,6 +72,8 @@ namespace Worktastic.Controllers
                 existing.ContactEmail = model.ContactEmail;
                 existing.ContactPhone = model.ContactPhone;
                 existing.ContactWebsite = model.ContactWebsite;
+                if (logoBytes != null)
+                    existing.CompanyLogo = logoBytes;
             }
 
             _db.SaveChanges();
