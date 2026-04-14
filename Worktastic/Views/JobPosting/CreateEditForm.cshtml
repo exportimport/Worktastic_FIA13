@@ -1,4 +1,81 @@
-﻿@{
-    ViewData["Title"] = "Inseratformular";
+@model Worktastic.Models.JobPosting
+
+@{
+    ViewData["Title"] = Model.Id == 0 ? "Neues Inserat" : "Inserat bearbeiten";
 }
-hier kommt das Formular
+
+<h2>@ViewData["Title"]</h2>
+
+<div class="row">
+    <div class="col-md-6">
+        <form asp-action="CreateEditForm" method="post">
+            <input type="hidden" asp-for="Id" />
+
+            <div class="mb-3">
+                <label asp-for="JobTitle" class="form-label">Jobtitel</label>
+                <input asp-for="JobTitle" class="form-control" />
+                <span asp-validation-for="JobTitle" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="JobDescription" class="form-label">Beschreibung</label>
+                <textarea asp-for="JobDescription" class="form-control" rows="4"></textarea>
+                <span asp-validation-for="JobDescription" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="JobLocation" class="form-label">Ort</label>
+                <input asp-for="JobLocation" class="form-control" />
+                <span asp-validation-for="JobLocation" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="StartDate" class="form-label">Startdatum</label>
+                <input asp-for="StartDate" type="date" class="form-control" />
+                <span asp-validation-for="StartDate" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="Salary" class="form-label">Gehalt (€)</label>
+                <input asp-for="Salary" type="number" class="form-control" />
+                <span asp-validation-for="Salary" class="text-danger"></span>
+            </div>
+
+            <hr />
+            <h5>Kontakt</h5>
+
+            <div class="mb-3">
+                <label asp-for="ContactName" class="form-label">Name</label>
+                <input asp-for="ContactName" class="form-control" />
+                <span asp-validation-for="ContactName" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="ContactEmail" class="form-label">E-Mail</label>
+                <input asp-for="ContactEmail" type="email" class="form-control" />
+                <span asp-validation-for="ContactEmail" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="ContactPhone" class="form-label">Telefon</label>
+                <input asp-for="ContactPhone" class="form-control" />
+                <span asp-validation-for="ContactPhone" class="text-danger"></span>
+            </div>
+
+            <div class="mb-3">
+                <label asp-for="ContactWebsite" class="form-label">Website</label>
+                <input asp-for="ContactWebsite" type="url" class="form-control" />
+                <span asp-validation-for="ContactWebsite" class="text-danger"></span>
+            </div>
+
+            <div class="d-flex gap-2">
+                <button type="submit" class="btn btn-primary">Speichern</button>
+                <a asp-action="Index" class="btn btn-secondary">Abbrechen</a>
+            </div>
+        </form>
+    </div>
+</div>
+
+@section Scripts {
+    @{await Html.RenderPartialAsync("_ValidationScriptsPartial");}
+}

@@ -3,6 +3,17 @@
 ##
 ## Get latest from https://github.com/github/gitignore/blob/master/VisualStudio.gitignore
 
+# ASP.NET Core local dev settings (may contain secrets)
+appsettings.Development.json
+
+# SQLite local database files
+*.db
+*.db-shm
+*.db-wal
+
+# LibMan / npm generated frontend libraries
+wwwroot/lib/
+
 # User-specific files
 *.rsuser
 *.suo
