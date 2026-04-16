@@ -1,5 +1,62 @@
-﻿@{
+﻿@model List<JobPosting>
+@{
     ViewData["Title"] = "Deine Inserate";
 }
 
-<a class="btn btn-success" asp-controller="JobPosting" asp-action="CreateEditForm">neues Inserat</a>
+<a class="btn btn-success mb-3" asp-controller="JobPosting" asp-action="CreateEditForm">neues Inserat</a>
+<hr class="mb-3 " />
+<table id="AdminTabelle" class="table table-bordered table-striped table-hover">
+    <thead>
+        <tr>
+            <th>Id</th>
+            <th>Job Titel</th>
+            <th>Ort</th>
+            <th>Startdatum</th>
+            <th>Aktionen</th>
+        </tr>
+    </thead>
+    <tbody>
+        @{
+            foreach(JobPosting job in Model)
+            {
+                <tr>
+                    <td>@job.Id</td>
+                    <td>@job.JobTitle</td>
+                    <td>@job.JobLocation</td>
+                    <td>@job.StartDate.ToShortDateString()</td>
+                    <td>
+                        <a class="btn btn-warning" asp-route-id="@job.Id" asp-controller="JobPosting" asp-action="CreateEditForm">Edit</a>
+                        <button class="btn btn-danger" onclick="deleteInserat(@job.Id)">Delete</button>
+                    </td>
+                </tr>
+            }
+        }
+    </tbody>
+</table>
+
+@section Scripts {
+    <script>
+        $(document).ready( function () {
+            $('#AdminTabelle').DataTable();
+} );
+
+         function deleteInserat(id) {
+             Swal.fire({
+                title: "Do you want to save the changes?",
+                showDenyButton: true,
+                showCancelButton: true,
+                confirmButtonText: "Save",
+                denyButtonText: `Don't save`
+                }).then((result) => {
+                /* Read more about isConfirmed, isDenied below */
+                if (result.isConfirmed) Swal.fire("Saved!", "", "success");
+                else if (result.isDenied) Swal.fire("Changes are not saved", "", "info");
+                });
+           }
+
+      
+
+      
+    </script>
+        
+}
