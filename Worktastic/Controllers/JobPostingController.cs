@@ -15,6 +15,12 @@ namespace Worktastic.Controllers
         }
         public IActionResult Index()
         {
+            if(User.IsInRole("Admin"))
+            {
+                var allPostings = _context.JobPosts.ToList();
+                return View(allPostings);
+            }
+
             var jobsFromDb = _context.JobPosts.Where(x => x.OwnerName == User.Identity.Name).ToList();
             return View(jobsFromDb);
         }
@@ -28,7 +34,7 @@ namespace Worktastic.Controllers
                 {
                     return NotFound();
                 }
-                if (User.Identity.Name != jobFromDb.OwnerName)
+                if (User.Identity.Name != jobFromDb.OwnerName && !User.IsInRole("Admin"))
                 {
                     return Unauthorized();
                 }

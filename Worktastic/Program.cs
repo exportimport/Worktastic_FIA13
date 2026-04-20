@@ -1,12 +1,13 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
+using System.Threading.Tasks;
 using Worktastic.Data;
 
 namespace Worktastic
 {
     public class Program
     {
-        public static void Main(string[] args)
+        public static async Task Main(string[] args)
         {
             var builder = WebApplication.CreateBuilder(args);
 
@@ -17,10 +18,45 @@ namespace Worktastic
             builder.Services.AddDatabaseDeveloperPageExceptionFilter();
 
             builder.Services.AddDefaultIdentity<IdentityUser>(options => options.SignIn.RequireConfirmedAccount = false)
+                .AddRoles<IdentityRole>()
                 .AddEntityFrameworkStores<ApplicationDbContext>();
             builder.Services.AddControllersWithViews();
 
             var app = builder.Build();
+
+            using (var scope = app.Services.CreateScope())
+            {
+                var services = scope.ServiceProvider;
+                var roleManager = services.GetRequiredService<RoleManager<IdentityRole>>();
+                var userManager = services.GetRequiredService<UserManager<IdentityUser>>();
+                //Rolle "Admin" erstellen
+                await CreateRole(roleManager, "Admin");
+                //Rolle "User" erstellen
+                await CreateDefaultUser(userManager, "Admin", "admin@worktastic.de");
+            }
+                //Methode zum erstellen einer Rolle
+             async Task CreateRole(RoleManager<IdentityRole> roleManager, string roleName)
+             {
+                
+                if (!await roleManager.RoleExistsAsync(roleName))
+                {
+                    await roleManager.CreateAsync(new IdentityRole(roleName));
+                }
+            }
+
+            async Task CreateDefaultUser(UserManager<IdentityUser> userManager, string roleName, string userName)
+            {
+                var user = await userManager.FindByNameAsync(userName);
+                if (user == null)
+                {
+                    user = new IdentityUser { UserName = userName, Email = userName };
+                    var result = await userManager.CreateAsync(user, "Password123!");
+                    if (result.Succeeded)
+                    {
+                        await userManager.AddToRoleAsync(user, roleName);
+                    }
+                }
+            }
 
             // Configure the HTTP request pipeline.
             if (app.Environment.IsDevelopment())

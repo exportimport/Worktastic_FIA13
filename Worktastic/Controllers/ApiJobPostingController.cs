@@ -3,13 +3,14 @@ using Microsoft.AspNetCore.Mvc;
 using Microsoft.CodeAnalysis.CSharp.Syntax;
 using SQLitePCL;
 using Worktastic.Data;
+using Worktastic.filters;
 using Worktastic.Models;
 
 namespace Worktastic.Controllers
 {
     [Route("api/jobposting")]
     [ApiController]
-
+    
     public class ApiJobPostingController : ControllerBase
     {
         private readonly ApplicationDbContext _context;
@@ -33,6 +34,7 @@ namespace Worktastic.Controllers
             return Ok(jobFromDb);
         }
 
+        [ApiKeyAuthentication]
         [HttpPost("Create")]
         public IActionResult Create(JobPosting job)
         {
