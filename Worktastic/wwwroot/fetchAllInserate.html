@@ -1,0 +1,54 @@
+﻿<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="utf-8" />
+    <title>Job Posting Übersicht</title>
+    <link rel="stylesheet" href="/lib/bootstrap/dist/css/bootstrap.min.css" />
+</head>
+<body>
+    <h1>Alle JobPostings</h1>
+    <button  class="btn btn-danger mb-4" onclick="ladeInserate()">alles laden</button>
+
+    <div id="ausgabe"></div>
+
+    <table class="table table-bordered table-hover table-striped">
+        <thead>
+            <tr>
+                <th>Id</th>
+                <th>Titel</th>
+                <th>Beschreibung</th>
+                <th>Gehalt</th>
+            </tr>
+        </thead>
+        <tbody id="tablecontent"></tbody>
+    </table>
+
+    <script>
+        async function ladeInserate() {
+            const response = await fetch("https://localhost:7036/api/jobposting/GetAll");
+            const daten = await response.json();
+
+            const ausgabe = document.getElementById("ausgabe");
+            ausgabe.innerHtml = "";
+
+            daten.forEach(job => {
+                ausgabe.innerHTML += `<p>${job.id} --- ${job.jobTitle} --- ${job.salary}€</p>`;
+            });
+
+            const tbody = document.getElementById("tablecontent");
+            tbody.innerHTML = "";
+
+            daten.forEach(job => {
+                const zeile = document.createElement("tr");
+                zeile.innerHTML = `
+                    <td>${job.id}</td>
+                    <td>${job.jobTitle}</td>
+                    <td>${job.jobDescription}</td>
+                    <td>${job.salary} €</td>`;
+
+                tbody.appendChild(zeile);
+            });
+        }
+    </script>
+</body>
+</html>

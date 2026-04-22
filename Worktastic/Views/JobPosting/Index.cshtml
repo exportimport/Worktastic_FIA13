@@ -40,23 +40,30 @@
             $('#AdminTabelle').DataTable();
 } );
 
-         function deleteInserat(id) {
-             Swal.fire({
-                title: "Do you want to save the changes?",
-                showDenyButton: true,
-                showCancelButton: true,
-                confirmButtonText: "Save",
-                denyButtonText: `Don't save`
-                }).then((result) => {
-                /* Read more about isConfirmed, isDenied below */
-                if (result.isConfirmed) Swal.fire("Saved!", "", "success");
-                else if (result.isDenied) Swal.fire("Changes are not saved", "", "info");
-                });
-           }
+function deleteInserat(jobPostingId) {
+    Swal.fire({
+    title: "Wollen Sie das Inserat wirklich löschen?",
+    icon: "warning",
+    confirmButtonText: "Ja, löschen",
+    }).then((result) => {
+        if (result.isConfirmed) {
+            $.ajax({
+                type: "POST",
+                url: "@Url.Action("Delete")",
+                data: {id : jobPostingId },
+                success: function (msg) {
+                    Swal.fire("Inserat gelöscht", "", "success").then((result) => {
+                        location.reload();
+                    )};
+                },
+                error: function (msg) {
+                    Swal.fire("Ups, es ist was schiefgelaufen!", "", "error");
+                }
+            });      
+        }
+    });
+}
 
-      
-
-      
-    </script>
+</script>
         
 }

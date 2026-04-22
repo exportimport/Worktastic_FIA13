@@ -17,23 +17,29 @@ namespace Worktastic.Controllers
 
         public IActionResult Index()
         {
-            var posts = _context.JobPosts
-                .Where(p => p.OwnerName == User.Identity!.Name)
-                .ToList();
-            return View(posts);
+            if (User.IsInRole("Admin"))
+            {
+                var allPostings = _context.JobPosts.ToList();
+                return View(allPostings);
+            }
+
+            var jobsFromDb = _context.JobPosts.Where(x => x.OwnerName == User.Identity!.Name).ToList();
+            return View(jobsFromDb);
         }
 
         [HttpGet]
         public IActionResult CreateEditForm(int id = 0)
         {
-            if (id == 0)
-                return View(new JobPosting());
-
-            var post = _context.JobPosts.Find(id);
-            if (post == null || post.OwnerName != User.Identity!.Name)
-                return NotFound();
-
-            return View(post);
+            if (id != 0)
+            {
+                var jobFromDb = _context.JobPosts.SingleOrDefault(x => x.Id == id);
+                if (jobFromDb == null)
+                    return NotFound();
+                if (User.Identity!.Name != jobFromDb.OwnerName && !User.IsInRole("Admin"))
+                    return Unauthorized();
+                return View(jobFromDb);
+            }
+            return View(new JobPosting());
         }
 
         [HttpPost]
@@ -42,8 +48,6 @@ namespace Worktastic.Controllers
         {
             if (!ModelState.IsValid)
                 return View("CreateEditForm", jobPosting);
-
-            jobPosting.OwnerName = User.Identity!.Name;
 
             if (CompanyLogo != null && CompanyLogo.Length > 0)
             {
@@ -54,14 +58,18 @@ namespace Worktastic.Controllers
 
             if (jobPosting.Id == 0)
             {
+                jobPosting.OwnerName = User.Identity!.Name;
                 _context.JobPosts.Add(jobPosting);
             }
             else
             {
                 var existing = _context.JobPosts.Find(jobPosting.Id);
-                if (existing == null || existing.OwnerName != User.Identity!.Name)
+                if (existing == null)
                     return NotFound();
+                if (existing.OwnerName != User.Identity!.Name && !User.IsInRole("Admin"))
+                    return Unauthorized();
 
+                // nicht überschreiben: Eigentümer bleibt der ursprüngliche User
                 existing.JobTitle = jobPosting.JobTitle;
                 existing.JobDescription = jobPosting.JobDescription;
                 existing.JobLocation = jobPosting.JobLocation;
@@ -79,6 +87,8 @@ namespace Worktastic.Controllers
             return RedirectToAction(nameof(Index));
         }
 
+        [HttpPost]
+        [ValidateAntiForgeryToken]
         public IActionResult Delete(int id)
         {
             if (id == 0)
@@ -87,6 +97,9 @@ namespace Worktastic.Controllers
             var jobFromDb = _context.JobPosts.SingleOrDefault(x => x.Id == id);
             if (jobFromDb == null)
                 return NotFound();
+            if (jobFromDb.OwnerName != User.Identity!.Name && !User.IsInRole("Admin"))
+                return Unauthorized();
+
             _context.JobPosts.Remove(jobFromDb);
             _context.SaveChanges();
             return RedirectToAction("Index");
